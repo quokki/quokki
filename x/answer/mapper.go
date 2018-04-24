@@ -12,6 +12,12 @@ import (
 	"github.com/quokki/quokki/x/question"
 )
 
+/*
+Question's address is made by hashing answer's address and index.
+Make sure that index are not same.
+People can query questions by address hashed with answer's address and index.
+*/
+
 var _ AnswerMapper = (*BaseAnswerMapper)(nil)
 
 type BaseAnswerMapper struct {

@@ -10,6 +10,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+/*
+Currently, This package is closely related to mongodb.
+I will implement simple pub/sub system, so people will be able to use db that they want.
+*/
+
 var _session *mgo.Session = nil
 
 func SetSession(s *mgo.Session) {

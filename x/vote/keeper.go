@@ -11,7 +11,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-const VOTE_UP_RESTORE_TERM = 86400
+const VOTE_UP_RESTORE_TERM = 64800 //18 hours
 
 type VoteKeeper struct {
 	key sdk.StoreKey

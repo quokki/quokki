@@ -11,6 +11,11 @@ import (
 	"github.com/quokki/quokki/db"
 )
 
+/*
+Comments have target address, and they also have their address.
+TODO: Comments of comments.
+*/
+
 var _ CommentMapper = (*BaseCommentMapper)(nil)
 
 type BaseCommentMapper struct {

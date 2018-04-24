@@ -9,6 +9,12 @@ import (
 	crypto "github.com/tendermint/go-crypto"
 )
 
+/*
+If people are approved by the administrator,
+people can become a validator without any risk at present.
+TODO: If tendermint has matured enough, I will implement DPOS.
+*/
+
 type NotstakeKeeper struct {
 	ck bank.CoinKeeper
 

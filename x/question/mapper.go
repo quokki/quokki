@@ -11,6 +11,12 @@ import (
 	"github.com/quokki/quokki/db"
 )
 
+/*
+Make sure that you make new address before saving question.
+Question struct has olny data that is related to provisions.
+Title and content, etc... are separated.
+*/
+
 var _ QuestionMapper = (*BaseQuestionMapper)(nil)
 
 type BaseQuestionMapper struct {

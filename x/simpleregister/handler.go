@@ -4,6 +4,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+/*
+Just very simple register.
+This will be depreciated.
+*/
+
 func NewHandler(am sdk.AccountMapper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {

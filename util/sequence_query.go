@@ -12,6 +12,11 @@ import (
 	"github.com/quokki/quokki/types"
 )
 
+/*
+Just for query sequence as JSON.
+This will be depreciated.
+*/
+
 func NewSequenceQueryHandler(keyStore sdk.KVStoreKey, decoder sdk.AccountDecoder) types.QueryHandler {
 	return func(baseapp *bam.BaseApp, req abci.RequestQuery) (res abci.ResponseQuery) {
 		addr := req.Path
