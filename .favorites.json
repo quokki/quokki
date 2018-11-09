@@ -1,0 +1,20 @@
+[
+    {
+        "type": "Directory",
+        "name": "c:\\Users\\yunjh\\quokki-frontend\\node_modules\\js-amino",
+        "parent_id": null,
+        "fsPath": "c:\\Users\\yunjh\\quokki-frontend\\node_modules\\js-amino",
+        "workspaceRoot": null,
+        "workspacePath": null,
+        "id": "Qli56UscVpW0g7X3"
+    },
+    {
+        "type": "File",
+        "name": "c:\\Users\\yunjh\\quokki-frontend\\test.js",
+        "parent_id": null,
+        "fsPath": "c:\\Users\\yunjh\\quokki-frontend\\test.js",
+        "workspaceRoot": null,
+        "workspacePath": null,
+        "id": "ufrk31KxOAwBFUly"
+    }
+]
