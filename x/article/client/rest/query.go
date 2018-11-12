@@ -1,9 +1,11 @@
 package rest
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"net/http"
+	"sort"
 	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -134,6 +136,20 @@ func QueryArticleRootRequestHandlerFn(storeName string, cdc *wire.Codec, cliCtx 
 	}
 }
 
+type Articles []articleTypes.Article
+
+func (articles Articles) Len() int {
+	return len(articles)
+}
+
+func (articles Articles) Less(i, j int) bool {
+	return bytes.Compare(articles[i].Id, articles[j].Id) < 0
+}
+
+func (articles Articles) Swap(i, j int) {
+	articles[i], articles[j] = articles[j], articles[i]
+}
+
 func QueryArticlesRequestHandlerFn(storeName string, cdc *wire.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -168,6 +184,11 @@ func QueryArticlesRequestHandlerFn(storeName string, cdc *wire.Codec, cliCtx con
 			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
 				w.Write([]byte(err.Error()))
+				return
+			}
+			if perPage > 30 {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("Too many per page"))
 				return
 			}
 		}
@@ -205,35 +226,46 @@ func QueryArticlesRequestHandlerFn(storeName string, cdc *wire.Codec, cliCtx con
 		start := numOfArticles - (page * perPage)
 		end := numOfArticles - ((page - 1) * perPage)
 
-		articles := make([]articleTypes.Article, 0, perPage)
+		articles := make(Articles, 0, perPage)
+		count := 0
+
+		for id := end - 1; id >= start && id >= 0; id-- {
+			count++
+		}
+		chs := make(chan articleTypes.Article, count)
+		defer func() {
+			close(chs)
+		}()
 
 		// TODO: Use iterator. They don't support query by iterator yet...
 		for id := end - 1; id >= start && id >= 0; id-- {
-			bz := make([]byte, 8)
-			binary.BigEndian.PutUint64(bz, uint64(id))
-			res, err := cliCtx.QueryStore(append(pId, bz...), storeName)
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(fmt.Sprintf("couldn't query article. Error: %s", err.Error())))
-				return
-			}
+			go func(id int) {
+				bz := make([]byte, 8)
+				binary.BigEndian.PutUint64(bz, uint64(id))
+				res, err := cliCtx.QueryStore(append(pId, bz...), storeName)
+				if err != nil {
+					chs <- articleTypes.Article{}
+				}
 
-			// the query will return empty if there is no data for this account
-			if len(res) == 0 {
-				w.WriteHeader(http.StatusNoContent)
-				return
-			}
+				article := articleTypes.Article{}
+				err = cdc.UnmarshalBinaryBare(res, &article)
+				if err != nil {
+					chs <- articleTypes.Article{}
+				}
 
-			article := articleTypes.Article{}
-			err = cdc.UnmarshalBinaryBare(res, &article)
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(fmt.Sprintf("couldn't parse article result. Result: %s. Error: %s", res, err.Error())))
-				return
-			}
-
-			articles = append(articles, article)
+				chs <- article
+			}(id)
 		}
+
+		for i := 0; i < count; i++ {
+			if article, ok := <-chs; ok {
+				if len(article.Id) > 0 {
+					articles = append(articles, article)
+				}
+			}
+		}
+
+		sort.Sort(sort.Reverse(articles))
 
 		// print out whole account
 		output, err := cdc.MarshalJSON(articles)
