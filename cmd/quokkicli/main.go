@@ -1,98 +1,131 @@
 package main
 
 import (
-	"errors"
+	"log"
+	"net/http"
 	"os"
+	"os/signal"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
-	"github.com/tendermint/tmlibs/cli"
+	"github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/keys"
-	"github.com/cosmos/cosmos-sdk/client/lcd"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/client/tx"
-
 	"github.com/cosmos/cosmos-sdk/version"
-	authcmd "github.com/cosmos/cosmos-sdk/x/auth/commands"
-	bankcmd "github.com/cosmos/cosmos-sdk/x/bank/commands"
-	notstakecmd "github.com/quokki/quokki/x/notstake/commands"
-	powercmd "github.com/quokki/quokki/x/power/commands"
+	"github.com/cosmos/cosmos-sdk/wire"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
+	bankcmd "github.com/cosmos/cosmos-sdk/x/bank/client/cli"
 
-	answercmd "github.com/quokki/quokki/x/answer/commands"
-	commentcmd "github.com/quokki/quokki/x/comment/commands"
-	profilecmd "github.com/quokki/quokki/x/profile/commands"
-	questioncmd "github.com/quokki/quokki/x/question/commands"
-	votecmd "github.com/quokki/quokki/x/vote/commands"
+	authrest "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
+
+	articlecmd "github.com/quokki/quokki/x/article/client/cli"
+
+	articlerest "github.com/quokki/quokki/x/article/client/rest"
 
 	"github.com/quokki/quokki/app"
-	"github.com/quokki/quokki/types"
+
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 )
 
-// gaiacliCmd is the entry point for this binary
+// rootCmd is the entry point for this binary
 var (
-	basecliCmd = &cobra.Command{
+	rootCmd = &cobra.Command{
 		Use:   "quokkicli",
 		Short: "Quokki light-client",
 	}
 )
 
-func todoNotImplemented(_ *cobra.Command, _ []string) error {
-	return errors.New("TODO: Command not yet implemented")
-}
-
 func main() {
-	// disable sorting
 	cobra.EnableCommandSorting = false
-
-	// get the codec
 	cdc := app.MakeCodec()
 
 	// TODO: setup keybase, viper object, etc. to be passed into
 	// the below functions and eliminate global vars, like we do
 	// with the cdc
 
-	// add standard rpc, and tx commands
-	rpc.AddCommands(basecliCmd)
-	basecliCmd.AddCommand(client.LineBreak)
-	tx.AddCommands(basecliCmd, cdc)
-	basecliCmd.AddCommand(client.LineBreak)
+	// add standard rpc commands
+	rpc.AddCommands(rootCmd)
 
-	// add query/post commands (custom to binary)
-	basecliCmd.AddCommand(
+	//Add state commands
+	tendermintCmd := &cobra.Command{
+		Use:   "tendermint",
+		Short: "Tendermint state querying subcommands",
+	}
+	tendermintCmd.AddCommand(
+		rpc.BlockCommand(),
+		rpc.ValidatorCommand(),
+	)
+	tx.AddCommands(tendermintCmd, cdc)
+
+	viper.SetDefault(client.FlagChainID, "test-chain-0")
+	//Add auth and bank commands
+	rootCmd.AddCommand(
 		client.GetCommands(
-			authcmd.GetAccountCmd("acc", cdc, types.GetAccountDecoder(cdc)),
+			authcmd.GetAccountCmd("acc", cdc, authcmd.GetAccountDecoder(cdc)),
+			GetQueryCmd(cdc, authcmd.GetAccountDecoder(cdc)),
 		)...)
-	basecliCmd.AddCommand(
+	rootCmd.AddCommand(
 		client.PostCommands(
 			bankcmd.SendTxCmd(cdc),
+			articlecmd.WriteTxCmd(cdc),
 		)...)
-	/*basecliCmd.AddCommand(
-		client.PostCommands(
-			ibccmd.IBCTransferCmd(cdc),
-		)...)
-	basecliCmd.AddCommand(
-		client.PostCommands(
-			ibccmd.IBCRelayCmd(cdc),
-		)...)*/
+
 	// add proxy, version and key info
-	basecliCmd.AddCommand(
-		client.LineBreak,
-		lcd.ServeCommand(cdc),
+	rootCmd.AddCommand(
 		keys.Commands(),
 		client.LineBreak,
 		version.VersionCmd,
-		notstakecmd.Commands(cdc),
-		powercmd.Commands(cdc),
-		profilecmd.Commands(cdc),
-		questioncmd.Commands(cdc),
-		answercmd.Commands(cdc),
-		commentcmd.Commands(cdc),
-		votecmd.Commands(cdc),
 	)
 
 	// prepare and add flags
-	executor := cli.PrepareMainCmd(basecliCmd, "BC", os.ExpandEnv("$HOME/.quokkicli"))
-	executor.Execute()
+	executor := cli.PrepareMainCmd(rootCmd, "GA", app.DefaultCLIHome)
+	err := executor.Execute()
+	if err != nil {
+		// handle with #870
+		panic(err)
+	}
+}
+
+// GetAccountCmd returns a query account that will display the state of the
+// account at a given address.
+func GetQueryCmd(cdc *wire.Codec, decoder auth.AccountDecoder) *cobra.Command {
+	return &cobra.Command{
+		Use:   "rest-server",
+		Short: "Turn on rest api",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().
+				WithCodec(cdc).
+				WithAccountDecoder(decoder)
+
+			r := mux.NewRouter()
+			authrest.RegisterRoutes(cliCtx, r, cdc, "acc")
+			articlerest.RegisterRoutes(cliCtx, r, cdc, "article")
+			//http.Handle("/", r)
+			go func() {
+				if err := http.ListenAndServe(":8080", handlers.CORS()(r)); err != nil {
+					log.Println(err)
+				}
+			}()
+
+			c := make(chan os.Signal, 1)
+			// We'll accept graceful shutdowns when quit via SIGINT (Ctrl+C)
+			// SIGKILL, SIGQUIT or SIGTERM (Ctrl+/) will not be caught.
+			signal.Notify(c, os.Interrupt)
+
+			// Block until we receive our signal.
+			<-c
+
+			log.Println("shutting down")
+			os.Exit(0)
+
+			return nil
+		},
+	}
 }
