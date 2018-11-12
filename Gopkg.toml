@@ -53,3 +53,10 @@
 [prune]
   go-tests = true
 #  unused-packages = false
+<<<<<<< HEAD
+=======
+
+[[constraint]]
+  name = "github.com/gorilla/handlers"
+  version = "1.4.0"
+>>>>>>> abaedac3ab094eaaf28c6c6eeefaa1fdd8010bc3

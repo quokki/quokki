@@ -13,6 +13,7 @@ const (
 	CodeTooBigPayload      sdk.CodeType = 101
 	CodeNonexistentArticle sdk.CodeType = 102
 	CodeInvalidArticle     sdk.CodeType = 103
+	CodeAssignedArticle    sdk.CodeType = 104
 )
 
 func codeToDefaultMsg(code sdk.CodeType) string {
@@ -23,6 +24,8 @@ func codeToDefaultMsg(code sdk.CodeType) string {
 		return "Non existent article"
 	case CodeInvalidArticle:
 		return "Invalid article"
+	case CodeAssignedArticle:
+		return "Already assigned article"
 	default:
 		return sdk.CodeToDefaultMsg(code)
 	}
@@ -38,4 +41,8 @@ func ErrNonexistentArticle(codespace sdk.CodespaceType, id []byte) sdk.Error {
 
 func ErrInvalidArticle(codespace sdk.CodespaceType, id []byte) sdk.Error {
 	return sdk.NewError(codespace, CodeInvalidArticle, fmt.Sprintf("%s: %s", codeToDefaultMsg(CodeInvalidArticle), hex.EncodeToString(id)))
+}
+
+func ErrAssignedArticle(codespace sdk.CodespaceType, id []byte) sdk.Error {
+	return sdk.NewError(codespace, CodeAssignedArticle, fmt.Sprintf("%s: %s", codeToDefaultMsg(CodeAssignedArticle), hex.EncodeToString(id)))
 }

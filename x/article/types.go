@@ -1,17 +1,23 @@
 package article
 
-import sdk "github.com/cosmos/cosmos-sdk/types"
+import (
+	"time"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
 type Article struct {
-	Writer  sdk.AccAddress `json:"writer"`
-	Parent  []byte         `json:"parent"`
-	Payload []byte         `json:"payload"` //TODO: Only save hash of payload
+	Id        []byte         `json:"id"`
+	Writer    sdk.AccAddress `json:"writer"`
+	Parent    []byte         `json:"parent"`
+	Sequence  uint64         `json:"sequence"` // Similar with number of children
+	CreatedAt time.Time      `json:"createdAt"`
+	Payload   string         `json:"payload"` // TODO: Only save hash of payload
 }
 
-func NewArticle(writer sdk.AccAddress, parent []byte, payload []byte) Article {
-	return Article{
-		Writer:  writer,
-		Parent:  parent,
-		Payload: payload,
-	}
+// Genesis article has empty id
+// So genesis article will be parent of articles that have no explicit parent
+type GenesisArticle struct {
+	Writer  sdk.AccAddress `json:"writer"`
+	Payload string         `json:"payload"`
 }

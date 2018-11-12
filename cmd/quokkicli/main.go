@@ -1,7 +1,10 @@
 package main
 
 import (
+	"log"
 	"net/http"
+	"os"
+	"os/signal"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -23,8 +26,11 @@ import (
 
 	articlecmd "github.com/quokki/quokki/x/article/client/cli"
 
+	articlerest "github.com/quokki/quokki/x/article/client/rest"
+
 	"github.com/quokki/quokki/app"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -100,8 +106,24 @@ func GetQueryCmd(cdc *wire.Codec, decoder auth.AccountDecoder) *cobra.Command {
 
 			r := mux.NewRouter()
 			authrest.RegisterRoutes(cliCtx, r, cdc, "acc")
-			http.Handle("/", r)
-			http.ListenAndServe(":8080", nil)
+			articlerest.RegisterRoutes(cliCtx, r, cdc, "article")
+			//http.Handle("/", r)
+			go func() {
+				if err := http.ListenAndServe(":8080", handlers.CORS()(r)); err != nil {
+					log.Println(err)
+				}
+			}()
+
+			c := make(chan os.Signal, 1)
+			// We'll accept graceful shutdowns when quit via SIGINT (Ctrl+C)
+			// SIGKILL, SIGQUIT or SIGTERM (Ctrl+/) will not be caught.
+			signal.Notify(c, os.Interrupt)
+
+			// Block until we receive our signal.
+			<-c
+
+			log.Println("shutting down")
+			os.Exit(0)
 
 			return nil
 		},

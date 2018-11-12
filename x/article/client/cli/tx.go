@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"encoding/binary"
+	"fmt"
 	"os"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -17,7 +19,8 @@ import (
 )
 
 const (
-	flagPayload = "payload"
+	flagParentId = "parent"
+	flagPayload  = "payload"
 )
 
 func WriteTxCmd(cdc *codec.Codec) *cobra.Command {
@@ -35,19 +38,30 @@ func WriteTxCmd(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			strPayload := viper.GetString(flagPayload)
+			parentId := viper.GetInt64(flagParentId)
+			payload := viper.GetString(flagPayload)
 
 			from, err := cliCtx.GetFromAddress()
 			if err != nil {
 				return err
 			}
 
-			msg := article.NewMsgWrite(from, []byte{}, []byte(strPayload))
+			parent := []byte{}
+			if parentId >= 0 {
+				bz := make([]byte, 8)
+				binary.LittleEndian.PutUint64(bz, uint64(parentId))
+				parent = bz
+			}
+			msg := article.NewMsgWrite(from, parent, payload)
 
+			json, _ := cdc.MarshalJSON(msg)
+			fmt.Println("!!!")
+			fmt.Println(string(json))
 			return utils.SendTx(txCtx, cliCtx, []sdk.Msg{msg})
 		},
 	}
 
+	cmd.Flags().Int64(flagParentId, -1, "Parent id")
 	cmd.Flags().String(flagPayload, "", "Payload to inject")
 
 	return cmd

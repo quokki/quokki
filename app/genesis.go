@@ -14,6 +14,8 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/tendermint/tendermint/crypto"
 	tmtypes "github.com/tendermint/tendermint/types"
+
+	"github.com/quokki/quokki/x/article"
 )
 
 // DefaultKeyPass contains the default key password for genesis transactions
@@ -21,7 +23,8 @@ const DefaultKeyPass = "12345678"
 
 // State to Unmarshal
 type GenesisState struct {
-	Accounts []GenesisAccount `json:"accounts"`
+	Accounts       []GenesisAccount       `json:"accounts"`
+	GenesisArticle article.GenesisArticle `json:"genesisArticle"`
 }
 
 // GenesisAccount doesn't need pubkey or sequence
@@ -153,6 +156,7 @@ func QuokkiAppGenState(cdc *codec.Codec, appGenTxs []json.RawMessage) (genesisSt
 		return
 	}
 
+	genArticle := article.GenesisArticle{}
 	// get genesis flag account information
 	genaccs := make([]GenesisAccount, len(appGenTxs))
 	for i, appGenTx := range appGenTxs {
@@ -170,11 +174,17 @@ func QuokkiAppGenState(cdc *codec.Codec, appGenTxs []json.RawMessage) (genesisSt
 		}
 		acc := NewGenesisAccount(&accAuth)
 		genaccs[i] = acc
+
+		if i == 0 {
+			genArticle.Writer = genTx.Address
+			genArticle.Payload = "This is genesis article"
+		}
 	}
 
 	// create the final app state
 	genesisState = GenesisState{
-		Accounts: genaccs,
+		Accounts:       genaccs,
+		GenesisArticle: genArticle,
 	}
 	return
 }

@@ -123,6 +123,8 @@ func (app *QuokkiApp) initChainer(ctx sdk.Context, req abci.RequestInitChain) ab
 		app.accountMapper.SetAccount(ctx, acc)
 	}
 
+	app.articleKeeper.InitGenesis(ctx, genesisState.GenesisArticle)
+
 	return abci.ResponseInitChain{}
 }
 
