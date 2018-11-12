@@ -18,6 +18,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
 	"github.com/quokki/quokki/x/article"
+	"github.com/quokki/quokki/x/faucet"
 )
 
 const (
@@ -46,6 +47,7 @@ type QuokkiApp struct {
 	feeCollectionKeeper auth.FeeCollectionKeeper
 	coinKeeper          bank.Keeper
 	articleKeeper       article.Keeper
+	faucetKeeper        faucet.Keeper
 }
 
 // NewQuokkiApp returns a reference to an initialized GaiaApp.
@@ -75,15 +77,32 @@ func NewQuokkiApp(logger log.Logger, db dbm.DB, traceStore io.Writer, baseAppOpt
 	app.coinKeeper = bank.NewKeeper(app.accountMapper)
 	app.feeCollectionKeeper = auth.NewFeeCollectionKeeper(app.cdc, app.keyFeeCollection)
 	app.articleKeeper = article.NewKeeper(app.cdc, app.keyArticle, app.RegisterCodespace(article.DefaultCodespace))
+	app.faucetKeeper = faucet.NewKeeper(app.cdc, app.accountMapper)
 
 	// register message routes
 	app.Router().
 		AddRoute("bank", bank.NewHandler(app.coinKeeper)).
-		AddRoute("article", article.NewHandler(app.articleKeeper))
+		AddRoute("article", article.NewHandler(app.articleKeeper)).
+		AddRoute("faucet", faucet.NewHandler(app.faucetKeeper))
 
 	// initialize BaseApp
 	app.SetInitChainer(app.initChainer)
-	app.SetAnteHandler(auth.NewAnteHandler(app.accountMapper, app.feeCollectionKeeper))
+	anteHandler := auth.NewAnteHandler(app.accountMapper, app.feeCollectionKeeper)
+	app.SetAnteHandler(func(
+		ctx sdk.Context, tx sdk.Tx,
+	) (newCtx sdk.Context, res sdk.Result, abort bool) {
+		msgs := tx.GetMsgs()
+		if len(msgs) > 0 {
+			msg := msgs[0]
+			if msg.Type() == "faucet" {
+				newCtx = ctx
+				res = sdk.Result{}
+				abort = false
+				return
+			}
+		}
+		return anteHandler(ctx, tx)
+	})
 	app.MountStoresIAVL(app.keyMain, app.keyAccount, app.keyFeeCollection, app.keyArticle)
 	err := app.LoadLatestVersion(app.keyMain)
 	if err != nil {
@@ -99,6 +118,7 @@ func MakeCodec() *codec.Codec {
 	bank.RegisterWire(cdc)
 	auth.RegisterWire(cdc)
 	article.RegisterCodec(cdc)
+	faucet.RegisterCodec(cdc)
 	sdk.RegisterWire(cdc)
 	codec.RegisterCrypto(cdc)
 	return cdc
