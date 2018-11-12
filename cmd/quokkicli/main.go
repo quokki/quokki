@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -100,6 +101,8 @@ func GetQueryCmd(cdc *wire.Codec, decoder auth.AccountDecoder) *cobra.Command {
 		Use:   "rest-server",
 		Short: "Turn on rest api",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			runtime.GOMAXPROCS(runtime.NumCPU())
+
 			cliCtx := context.NewCLIContext().
 				WithCodec(cdc).
 				WithAccountDecoder(decoder)

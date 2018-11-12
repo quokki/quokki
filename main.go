@@ -58,11 +58,19 @@ func main() {
 	json, _ := cdc.MarshalJSON(stdTx)
 	fmt.Println(string(json))
 
+<<<<<<< HEAD
+	hex, err := hex.DecodeString("8f01f0625dee0a41c06abad60a145051d57ff4af941b4a4b22e6bb783d7e2e105cc112250a145051d57ff4af941b4a4b22e6bb783d7e2e105cc1120d0a047465737412053130303030120f0a090a04746573741201311080b5181a2f0a26eb5ae9872103e9db07a9a70eafacbbf2d9ecef2e5275074fc39f137cbe7942e84a18ca05cd4312010018022002220474657374")
+=======
 	bz, err := hex.DecodeString("8f01f0625dee0a41c06abad60a145051d57ff4af941b4a4b22e6bb783d7e2e105cc112250a145051d57ff4af941b4a4b22e6bb783d7e2e105cc1120d0a047465737412053130303030120f0a090a04746573741201311080b5181a2f0a26eb5ae9872103e9db07a9a70eafacbbf2d9ecef2e5275074fc39f137cbe7942e84a18ca05cd4312010018022002220474657374")
+>>>>>>> abaedac3ab094eaaf28c6c6eeefaa1fdd8010bc3
 	if err != nil {
 		panic(err)
 	}
 	stdTx = auth.StdTx{}
+<<<<<<< HEAD
+	cdc.UnmarshalBinary(hex, &stdTx)
+	fmt.Println(stdTx)
+=======
 	cdc.UnmarshalBinary(bz, &stdTx)
 	fmt.Println(stdTx)
 
@@ -77,4 +85,5 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("Signature:", hex.EncodeToString(sig))
+>>>>>>> abaedac3ab094eaaf28c6c6eeefaa1fdd8010bc3
 }
