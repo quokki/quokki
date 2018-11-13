@@ -2,7 +2,6 @@ package cli
 
 import (
 	"encoding/binary"
-	"fmt"
 	"os"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -53,10 +52,6 @@ func WriteTxCmd(cdc *codec.Codec) *cobra.Command {
 				parent = bz
 			}
 			msg := article.NewMsgWrite(from, parent, payload)
-
-			json, _ := cdc.MarshalJSON(msg)
-			fmt.Println("!!!")
-			fmt.Println(string(json))
 			return utils.SendTx(txCtx, cliCtx, []sdk.Msg{msg})
 		},
 	}
