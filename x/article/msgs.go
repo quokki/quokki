@@ -25,7 +25,7 @@ func (msg MsgWrite) Type() string {
 }
 
 func (msg MsgWrite) ValidateBasic() sdk.Error {
-	if len(msg.Payload) >= 1000 {
+	if len(msg.Payload) >= 2000 {
 		// TODO: codespace 처리하는거 cosmos-sdk에서 바뀌면 적용하기
 		return ErrTooBigPayload(DefaultCodespace)
 	}

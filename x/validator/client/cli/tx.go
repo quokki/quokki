@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"encoding/binary"
+	"fmt"
 	"os"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -14,18 +14,18 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/quokki/quokki/x/article"
+	"github.com/quokki/quokki/x/validator"
 )
 
 const (
-	flagParentId = "parent"
-	flagPayload  = "payload"
+	flagPubKey = "pubkey"
+	flagPower  = "power"
 )
 
-func WriteTxCmd(cdc *codec.Codec) *cobra.Command {
+func ValidatorTxCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "write",
-		Short: "Write article",
+		Use:   "validator",
+		Short: "set validator",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txCtx := authctx.NewTxContextFromCLI().WithCodec(cdc)
 			cliCtx := context.NewCLIContext().
@@ -37,27 +37,29 @@ func WriteTxCmd(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			parentId := viper.GetInt64(flagParentId)
-			payload := viper.GetString(flagPayload)
-
 			from, err := cliCtx.GetFromAddress()
 			if err != nil {
 				return err
 			}
 
-			parent := []byte{}
-			if parentId >= 0 {
-				bz := make([]byte, 8)
-				binary.LittleEndian.PutUint64(bz, uint64(parentId))
-				parent = bz
+			strPubKey := viper.GetString(flagPubKey)
+			pubKey, err := sdk.GetValPubKeyBech32(strPubKey)
+			if err != nil {
+				return err
 			}
-			msg := article.NewMsgWrite(from, parent, payload)
+
+			power := viper.GetInt64(flagPower)
+
+			valAddr := sdk.ValAddress(pubKey.Address())
+			fmt.Println(valAddr.String())
+
+			msg := validator.NewMsgValidator(from, valAddr, pubKey, power)
 			return utils.SendTx(txCtx, cliCtx, []sdk.Msg{msg})
 		},
 	}
 
-	cmd.Flags().Int64(flagParentId, -1, "Parent id")
-	cmd.Flags().String(flagPayload, "", "Payload to inject")
+	cmd.Flags().String(flagPubKey, "", "Pubkey")
+	cmd.Flags().Int64(flagPower, 1, "power")
 
 	return cmd
 }

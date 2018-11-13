@@ -26,6 +26,7 @@ import (
 	authrest "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
 
 	articlecmd "github.com/quokki/quokki/x/article/client/cli"
+	valcmd "github.com/quokki/quokki/x/validator/client/cli"
 
 	articlerest "github.com/quokki/quokki/x/article/client/rest"
 
@@ -76,6 +77,7 @@ func main() {
 		client.PostCommands(
 			bankcmd.SendTxCmd(cdc),
 			articlecmd.WriteTxCmd(cdc),
+			valcmd.ValidatorTxCmd(cdc),
 		)...)
 
 	// add proxy, version and key info

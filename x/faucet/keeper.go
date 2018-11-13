@@ -33,6 +33,7 @@ func (keeper Keeper) NewFaucet(ctx sdk.Context, address sdk.AccAddress) (sdk.Tag
 
 	al := alphabet[ctx.BlockHeight()%5]
 
+	// send coin and random token for test
 	account.SetCoins(sdk.Coins{
 		sdk.Coin{
 			Denom:  "quokki",

@@ -25,6 +25,7 @@ const DefaultKeyPass = "12345678"
 type GenesisState struct {
 	Accounts       []GenesisAccount       `json:"accounts"`
 	GenesisArticle article.GenesisArticle `json:"genesisArticle"`
+	Admin          sdk.AccAddress         `json:"admin"`
 }
 
 // GenesisAccount doesn't need pubkey or sequence
@@ -157,6 +158,7 @@ func QuokkiAppGenState(cdc *codec.Codec, appGenTxs []json.RawMessage) (genesisSt
 	}
 
 	genArticle := article.GenesisArticle{}
+	admin := sdk.AccAddress{}
 	// get genesis flag account information
 	genaccs := make([]GenesisAccount, len(appGenTxs))
 	for i, appGenTx := range appGenTxs {
@@ -178,6 +180,8 @@ func QuokkiAppGenState(cdc *codec.Codec, appGenTxs []json.RawMessage) (genesisSt
 		if i == 0 {
 			genArticle.Writer = genTx.Address
 			genArticle.Payload = "This is genesis article"
+
+			admin = genTx.Address
 		}
 	}
 
@@ -185,6 +189,7 @@ func QuokkiAppGenState(cdc *codec.Codec, appGenTxs []json.RawMessage) (genesisSt
 	genesisState = GenesisState{
 		Accounts:       genaccs,
 		GenesisArticle: genArticle,
+		Admin:          admin,
 	}
 	return
 }
