@@ -87,6 +87,7 @@ func NewQuokkiApp(logger log.Logger, db dbm.DB, traceStore io.Writer, baseAppOpt
 
 	// initialize BaseApp
 	app.SetInitChainer(app.initChainer)
+	// seemed very dangerous
 	anteHandler := auth.NewAnteHandler(app.accountMapper, app.feeCollectionKeeper)
 	app.SetAnteHandler(func(
 		ctx sdk.Context, tx sdk.Tx,
