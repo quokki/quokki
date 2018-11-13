@@ -19,6 +19,7 @@ import (
 
 	"github.com/quokki/quokki/x/article"
 	"github.com/quokki/quokki/x/faucet"
+	"github.com/quokki/quokki/x/validator"
 )
 
 const (
@@ -41,6 +42,7 @@ type QuokkiApp struct {
 	keyAccount       *sdk.KVStoreKey
 	keyFeeCollection *sdk.KVStoreKey
 	keyArticle       *sdk.KVStoreKey
+	keyValidator     *sdk.KVStoreKey
 
 	// Manage getting and setting accounts
 	accountMapper       auth.AccountMapper
@@ -48,6 +50,7 @@ type QuokkiApp struct {
 	coinKeeper          bank.Keeper
 	articleKeeper       article.Keeper
 	faucetKeeper        faucet.Keeper
+	validatorKeeper     validator.Keeper
 }
 
 // NewQuokkiApp returns a reference to an initialized GaiaApp.
@@ -64,6 +67,7 @@ func NewQuokkiApp(logger log.Logger, db dbm.DB, traceStore io.Writer, baseAppOpt
 		keyAccount:       sdk.NewKVStoreKey("acc"),
 		keyFeeCollection: sdk.NewKVStoreKey("fee"),
 		keyArticle:       sdk.NewKVStoreKey("article"),
+		keyValidator:     sdk.NewKVStoreKey("validator"),
 	}
 
 	// define the accountMapper
@@ -78,15 +82,18 @@ func NewQuokkiApp(logger log.Logger, db dbm.DB, traceStore io.Writer, baseAppOpt
 	app.feeCollectionKeeper = auth.NewFeeCollectionKeeper(app.cdc, app.keyFeeCollection)
 	app.articleKeeper = article.NewKeeper(app.cdc, app.keyArticle, app.RegisterCodespace(article.DefaultCodespace))
 	app.faucetKeeper = faucet.NewKeeper(app.cdc, app.accountMapper)
+	app.validatorKeeper = validator.NewKeeper(cdc, app.keyValidator)
 
 	// register message routes
 	app.Router().
 		AddRoute("bank", bank.NewHandler(app.coinKeeper)).
 		AddRoute("article", article.NewHandler(app.articleKeeper)).
-		AddRoute("faucet", faucet.NewHandler(app.faucetKeeper))
+		AddRoute("faucet", faucet.NewHandler(app.faucetKeeper)).
+		AddRoute("validator", validator.NewHandler(app.validatorKeeper))
 
 	// initialize BaseApp
 	app.SetInitChainer(app.initChainer)
+	app.SetEndBlocker(app.EndBlocker)
 	// seemed very dangerous
 	anteHandler := auth.NewAnteHandler(app.accountMapper, app.feeCollectionKeeper)
 	app.SetAnteHandler(func(
@@ -104,7 +111,7 @@ func NewQuokkiApp(logger log.Logger, db dbm.DB, traceStore io.Writer, baseAppOpt
 		}
 		return anteHandler(ctx, tx)
 	})
-	app.MountStoresIAVL(app.keyMain, app.keyAccount, app.keyFeeCollection, app.keyArticle)
+	app.MountStoresIAVL(app.keyMain, app.keyAccount, app.keyFeeCollection, app.keyArticle, app.keyValidator)
 	err := app.LoadLatestVersion(app.keyMain)
 	if err != nil {
 		cmn.Exit(err.Error())
@@ -120,6 +127,7 @@ func MakeCodec() *codec.Codec {
 	auth.RegisterWire(cdc)
 	article.RegisterCodec(cdc)
 	faucet.RegisterCodec(cdc)
+	validator.RegisterCodec(cdc)
 	sdk.RegisterWire(cdc)
 	codec.RegisterCrypto(cdc)
 	return cdc
@@ -146,7 +154,17 @@ func (app *QuokkiApp) initChainer(ctx sdk.Context, req abci.RequestInitChain) ab
 
 	app.articleKeeper.InitGenesis(ctx, genesisState.GenesisArticle)
 
+	validator.SetAdmin(ctx, app.validatorKeeper, genesisState.Admin)
+
 	return abci.ResponseInitChain{}
+}
+
+func (app *QuokkiApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
+	validatorUpdates := validator.EndBlocker(ctx, app.validatorKeeper)
+
+	return abci.ResponseEndBlock{
+		ValidatorUpdates: validatorUpdates,
+	}
 }
 
 // export the state of gaia for a genesis file
