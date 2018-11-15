@@ -39,7 +39,6 @@
   packages = ["btcec"]
   pruneopts = "T"
   revision = "67e573d211ace594f1366b4ce9d39726c4b19bd0"
-<<<<<<< HEAD
 
 [[projects]]
   digest = "1:d0d998526cfb68788229a31c16a557fdf1fbbb510654be6b3732c2758e06b533"
@@ -49,17 +48,6 @@
   revision = "d4cc87b860166d00d6b5b9e0d3b3d71d6088d4d4"
 
 [[projects]]
-=======
-
-[[projects]]
-  digest = "1:d0d998526cfb68788229a31c16a557fdf1fbbb510654be6b3732c2758e06b533"
-  name = "github.com/btcsuite/btcutil"
-  packages = ["bech32"]
-  pruneopts = "T"
-  revision = "d4cc87b860166d00d6b5b9e0d3b3d71d6088d4d4"
-
-[[projects]]
->>>>>>> abaedac3ab094eaaf28c6c6eeefaa1fdd8010bc3
   digest = "1:bc28e755cf6a9fd8e65497514d20c4907973e7a6a6409d30ead3fd37bfeb19a9"
   name = "github.com/cosmos/cosmos-sdk"
   packages = [
@@ -84,10 +72,7 @@
     "x/auth",
     "x/auth/client/cli",
     "x/auth/client/context",
-<<<<<<< HEAD
-=======
     "x/auth/client/rest",
->>>>>>> abaedac3ab094eaaf28c6c6eeefaa1fdd8010bc3
     "x/bank",
     "x/bank/client",
     "x/bank/client/cli",
@@ -195,8 +180,6 @@
   pruneopts = "T"
   revision = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
   version = "v1.1.1"
-<<<<<<< HEAD
-=======
 
 [[projects]]
   digest = "1:664d37ea261f0fc73dd17f4a1f5f46d01fbb0b0d75f6375af064824424109b7d"
@@ -205,7 +188,6 @@
   pruneopts = "T"
   revision = "7e0847f9db758cdebd26c149d0ae9d5d0b9c98ce"
   version = "v1.4.0"
->>>>>>> abaedac3ab094eaaf28c6c6eeefaa1fdd8010bc3
 
 [[projects]]
   digest = "1:e73f5b0152105f18bc131fba127d9949305c8693f8a762588a82a48f61756f5f"
@@ -230,6 +212,7 @@
     ".",
     "hcl/ast",
     "hcl/parser",
+    "hcl/printer",
     "hcl/scanner",
     "hcl/strconv",
     "hcl/token",
@@ -332,7 +315,6 @@
   revision = "ae27198cdd90bf12cd134ad79d1366a6cf49f632"
 
 [[projects]]
-<<<<<<< HEAD
   branch = "master"
   digest = "1:185cf55b1f44a1bf243558901c3f06efa5c64ba62cfdcbb1bf7bbe8c3fb68561"
   name = "github.com/prometheus/client_model"
@@ -342,18 +324,7 @@
 
 [[projects]]
   branch = "master"
-=======
-  branch = "master"
-  digest = "1:185cf55b1f44a1bf243558901c3f06efa5c64ba62cfdcbb1bf7bbe8c3fb68561"
-  name = "github.com/prometheus/client_model"
-  packages = ["go"]
-  pruneopts = "T"
-  revision = "5c3871d89910bfb32f5fcab2aa4b9ec68e65a99f"
-
-[[projects]]
-  branch = "master"
->>>>>>> abaedac3ab094eaaf28c6c6eeefaa1fdd8010bc3
-  digest = "1:2d9b03513fadf4adf193b3570f5ef65ee57b658d9f11e901a06d17baf2bdc88b"
+  digest = "1:226f43328023ff72cabd3d321ac29a06ba66cd403da8e2b8b671a5add5d1d93e"
   name = "github.com/prometheus/common"
   packages = [
     "expfmt",
@@ -361,7 +332,7 @@
     "model",
   ]
   pruneopts = "T"
-  revision = "7e9e6cabbd393fc208072eedef99188d0ce788b6"
+  revision = "41aa239b4cce3c56ab88fc366ae8b0a6423fa239"
 
 [[projects]]
   branch = "master"
@@ -447,7 +418,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ea4a45f31f55c7a42ba3063baa646ac94eb7ee9afe60c1fd2c8b396930222620"
+  digest = "1:fa0605d74039818b662892c950cfd9938ab81ebb5f8e2479ceb4734cdae21df3"
   name = "github.com/syndtr/goleveldb"
   packages = [
     "leveldb",
@@ -464,7 +435,7 @@
     "leveldb/util",
   ]
   pruneopts = "T"
-  revision = "6b91fda63f2e36186f1c9d0e48578defb69c5d43"
+  revision = "f9080354173f192dfc8821931eacf9cfd6819253"
 
 [[projects]]
   branch = "master"
@@ -570,7 +541,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:482ae811efe307bd9d00f66de80385fba51325054f8ff573e894185e72441f08"
+  digest = "1:0550efca924537365fba757950ae7b6ec8c11f018b5c2d6a189ac9a2af0f1ba7"
   name = "golang.org/x/crypto"
   packages = [
     "blowfish",
@@ -589,7 +560,7 @@
     "salsa20/salsa",
   ]
   pruneopts = "T"
-  revision = "4d3f4d9ffa16a13f451c3b2999e9c49e9750bf06"
+  revision = "3d3f9f413869b949e48070b5bc593aa22cc2b8f2"
 
 [[projects]]
   digest = "1:5fdc7adede42f80d6201258355d478d856778e21d735f14972abd8ff793fdbf7"
@@ -609,14 +580,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:45338ae017da374291efa3e84ee143e573e791a07ec104e651f213b3dce0eb14"
+  digest = "1:a810055cfbdd9025f18eac69cc78b9284f549cd2c2a3990765de09dc828b713f"
   name = "golang.org/x/sys"
   packages = [
     "cpu",
     "unix",
   ]
   pruneopts = "T"
-  revision = "9b800f95dbbc54abff0acf7ee32d88ba4e328c89"
+  revision = "66b7b1311ac80bbafcd2daeef9a5e6e2cd1e2399"
 
 [[projects]]
   digest = "1:6164911cb5e94e8d8d5131d646613ff82c14f5a8ce869de2f6d80d9889df8c5a"
@@ -643,11 +614,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:80aae82eb03dd30038e2002cdbf3dc269bc17bfd170ef5c5a816b224ae29776f"
+  digest = "1:212d4045ef941b209a154001718705dc723bd77e0200fcea36d15ec87ed49dec"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "T"
-  revision = "c830210a61dfaa790e1920f8d0470fc27bc2efbe"
+  revision = "b5d43981345bdb2c233eb4bf3277847b48c6fdc6"
 
 [[projects]]
   digest = "1:adafc60b1d4688759f3fc8f9089e71dd17abd123f4729de6b913bf08c9143770"
@@ -710,15 +681,6 @@
     "github.com/cosmos/cosmos-sdk/x/auth",
     "github.com/cosmos/cosmos-sdk/x/auth/client/cli",
     "github.com/cosmos/cosmos-sdk/x/auth/client/context",
-<<<<<<< HEAD
-    "github.com/cosmos/cosmos-sdk/x/bank",
-    "github.com/cosmos/cosmos-sdk/x/bank/client/cli",
-    "github.com/spf13/cobra",
-    "github.com/spf13/pflag",
-    "github.com/spf13/viper",
-    "github.com/tendermint/tendermint/abci/types",
-    "github.com/tendermint/tendermint/crypto",
-=======
     "github.com/cosmos/cosmos-sdk/x/auth/client/rest",
     "github.com/cosmos/cosmos-sdk/x/bank",
     "github.com/cosmos/cosmos-sdk/x/bank/client/cli",
@@ -727,11 +689,8 @@
     "github.com/spf13/cobra",
     "github.com/spf13/pflag",
     "github.com/spf13/viper",
-    "github.com/tendermint/go-amino",
     "github.com/tendermint/tendermint/abci/types",
     "github.com/tendermint/tendermint/crypto",
-    "github.com/tendermint/tendermint/crypto/secp256k1",
->>>>>>> abaedac3ab094eaaf28c6c6eeefaa1fdd8010bc3
     "github.com/tendermint/tendermint/libs/cli",
     "github.com/tendermint/tendermint/libs/common",
     "github.com/tendermint/tendermint/libs/db",

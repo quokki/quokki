@@ -50,13 +50,10 @@
   name = "github.com/zondax/ledger-goclient"
   revision = "4296ee5701e945f9b3a7dbe51f402e0b9be57259"
 
-[prune]
-  go-tests = true
-#  unused-packages = false
-<<<<<<< HEAD
-=======
-
 [[constraint]]
   name = "github.com/gorilla/handlers"
   version = "1.4.0"
->>>>>>> abaedac3ab094eaaf28c6c6eeefaa1fdd8010bc3
+
+[prune]
+  go-tests = true
+#  unused-packages = false
